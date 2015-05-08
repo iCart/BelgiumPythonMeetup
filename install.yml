@@ -1,0 +1,45 @@
+---
+- name: Install realistics on a server
+  hosts:
+        - realistics.eyepea.eu
+  gather_facts: True
+  tasks:
+        - name: Install packages on Debian
+          apt: name= state=present
+          when: ansible_os_family == 'Debian'
+          with_items:
+            - git
+
+        - name: Install packages on CentOS
+          yum: name=git state=present
+          when: ansible_os_family == 'RedHat'
+          with_items:
+            - git
+
+        - name: Clone project
+          git: repo=git@example.com:realistics.git dest=/opt/realistics
+
+        - name: Install requirements
+          pip: requirements=/opt/realistics/requirements.txt
+               virtualenv=/opt/realistics/pyvenv
+               virtualenv_command=/usr/local/pythonz/pythons/CPython-3.4.3/bin/pyvenv
+
+        - name: Create log dir
+          file: dest=/var/log/realistics owner=root group=root state=directory
+
+        - name: Link default config file
+          file: state=link dest=/etc/default/realistics src=/opt/realistics/etc/default/realistics
+
+        - name: Link startup script
+          file: state=link dest=/etc/init.d/realistics src=/opt/realistics/etc/init.d/realistics
+
+        - name: Link logrotate config file
+          file: state=link dest=/etc/logrotate.d/realistics src=/opt/realistics/etc/logrotate.d/realistics
+
+        - name: Make it start with the system
+          service: name=realistics enabled=yes
+
+        - name: Copy the template configuration file to etc
+          command: cp -a /opt/realistics/etc/realistics /etc/
+          args:
+            creates: "/etc/realistics"
