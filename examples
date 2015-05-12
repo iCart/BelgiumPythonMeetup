@@ -1,0 +1,5 @@
+ansible -i inventory -u vagrant -m setup all
+ansible -i inventory mymachine -m pip -a "name=django virtualenv=/opt/mysuperduperapp"
+
+
+http://docs.ansible.com/list_of_all_modules.html
